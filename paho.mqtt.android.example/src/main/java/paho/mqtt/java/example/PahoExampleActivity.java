@@ -36,18 +36,22 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.ArrayList;
 
-public class PahoExampleActivity extends AppCompatActivity{
+public class PahoExampleActivity extends AppCompatActivity {
+
     private HistoryAdapter mAdapter;
 
     MqttAndroidClient mqttAndroidClient;
 
-    final String serverUri = "tcp://iot.eclipse.org:1883";
+    // final String serverUri = "tcp://iot.eclipse.org:1883";
+    final String serverUri = "tcp://wiki.lovgrammer.net:1884";
 
     String clientId = "ExampleAndroidClient";
     final String subscriptionTopic = "exampleAndroidTopic";
     final String publishTopic = "exampleAndroidPublishTopic";
     final String publishMessage = "Hello World!";
 
+    int keepAlive = 15 * 60;
+    int timeout = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,12 +111,8 @@ public class PahoExampleActivity extends AppCompatActivity{
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setAutomaticReconnect(true);
         mqttConnectOptions.setCleanSession(false);
-
-
-
-
-
-
+        mqttConnectOptions.setKeepAliveInterval(keepAlive);
+        mqttConnectOptions.setConnectionTimeout(timeout);
 
         try {
             //addToHistory("Connecting to " + serverUri);
@@ -152,7 +152,6 @@ public class PahoExampleActivity extends AppCompatActivity{
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-
         return true;
     }
 
@@ -162,9 +161,7 @@ public class PahoExampleActivity extends AppCompatActivity{
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -198,7 +195,6 @@ public class PahoExampleActivity extends AppCompatActivity{
     }
 
     public void publishMessage(){
-
         try {
             MqttMessage message = new MqttMessage();
             message.setPayload(publishMessage.getBytes());

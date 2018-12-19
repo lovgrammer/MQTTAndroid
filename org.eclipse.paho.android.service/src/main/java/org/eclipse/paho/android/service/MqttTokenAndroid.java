@@ -3,11 +3,11 @@
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
- * and Eclipse Distribution License v1.0 which accompany this distribution. 
+ * and Eclipse Distribution License v1.0 which accompany this distribution.
  *
- * The Eclipse Public License is available at 
+ * The Eclipse Public License is available at
  *    http://www.eclipse.org/legal/epl-v10.html
- * and the Eclipse Distribution License is available at 
+ * and the Eclipse Distribution License is available at
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  */
 package org.eclipse.paho.android.service;
@@ -47,7 +47,7 @@ class MqttTokenAndroid implements IMqttToken {
 
   /**
    * Standard constructor
-   * 
+   *
    * @param client used to pass MqttAndroidClient object
    * @param userContext used to pass context
    * @param listener optional listener that will be notified when the action completes. Use null if not required.
@@ -59,7 +59,7 @@ class MqttTokenAndroid implements IMqttToken {
 
   /**
    * Constructor for use with subscribe operations
-   * 
+   *
    * @param client used to pass MqttAndroidClient object
    * @param userContext used to pass context
    * @param listener optional listener that will be notified when the action completes. Use null if not required.
@@ -233,20 +233,20 @@ class MqttTokenAndroid implements IMqttToken {
   public int getMessageId() {
     return (delegate != null) ? delegate.getMessageId() : 0;
   }
-  
+
   @Override
   public MqttWireMessage getResponse() {
     return delegate.getResponse();
   }
-  
+
   @Override
   public boolean getSessionPresent() {
     return delegate.getSessionPresent();
   }
-  
+
   @Override
   public int[] getGrantedQos() {
     return delegate.getGrantedQos();
   }
-  
+
 }

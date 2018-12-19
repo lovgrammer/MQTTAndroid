@@ -15,18 +15,7 @@
  */
 package org.eclipse.paho.android.service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
-import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -39,9 +28,21 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.PowerManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
+import org.eclipse.paho.client.mqttv3.MqttSecurityException;
 
 /**
  * <p>
@@ -225,21 +226,21 @@ import android.support.v4.content.LocalBroadcastManager;
 @SuppressLint("Registered")
 public class MqttService extends Service implements MqttTraceHandler {
 
-	// Identifier for Intents, log messages, etc..
-	static final String TAG = "MqttService";
+    // Identifier for Intents, log messages, etc..
+    static final String TAG = "MqttService";
 
-	// callback id for making trace callbacks to the Activity
-	// needs to be set by the activity as appropriate
-	private String traceCallbackId;
-	// state of tracing
-	private boolean traceEnabled = false;
+    // callback id for making trace callbacks to the Activity
+    // needs to be set by the activity as appropriate
+    private String traceCallbackId;
+    // state of tracing
+    private boolean traceEnabled = false;
 
-	// somewhere to persist received messages until we're sure
-	// that they've reached the application
-	MessageStore messageStore;
+    // somewhere to persist received messages until we're sure
+    // that they've reached the application
+    MessageStore messageStore;
 
-	// An intent receiver to deal with changes in network connectivity
-	private NetworkConnectionIntentReceiver networkConnectionMonitor;
+    // An intent receiver to deal with changes in network connectivity
+    private NetworkConnectionIntentReceiver networkConnectionMonitor;
 
   //a receiver to recognise when the user changes the "background data" preference
   // and a flag to track that preference
@@ -251,8 +252,8 @@ public class MqttService extends Service implements MqttTraceHandler {
   // a way to pass ourself back to the activity
   private MqttServiceBinder mqttServiceBinder;
 
-	// mapping from client handle strings to actual client connections.
-	private Map<String/* clientHandle */, MqttConnection/* client */> connections = new ConcurrentHashMap<>();
+    // mapping from client handle strings to actual client connections.
+    private Map<String/* clientHandle */, MqttConnection/* client */> connections = new ConcurrentHashMap<>();
 
   public MqttService() {
     super();
@@ -299,13 +300,13 @@ public class MqttService extends Service implements MqttTraceHandler {
    *         MqttConnection
    */
   public String getClient(String serverURI, String clientId, String contextId, MqttClientPersistence persistence) {
-    String clientHandle = serverURI + ":" + clientId+":"+contextId;
-    if (!connections.containsKey(clientHandle)) {
-      MqttConnection client = new MqttConnection(this, serverURI,
-          clientId, persistence, clientHandle);
-      connections.put(clientHandle, client);
-    }
-    return clientHandle;
+      String clientHandle = serverURI + ":" + clientId + ":" + contextId;
+      if (!connections.containsKey(clientHandle)) {
+          MqttConnection client = new MqttConnection(this, serverURI,
+                                                     clientId, persistence, clientHandle);
+          connections.put(clientHandle, client);
+      }
+      return clientHandle;
   }
 
   /**
@@ -325,8 +326,8 @@ public class MqttService extends Service implements MqttTraceHandler {
   public void connect(String clientHandle, MqttConnectOptions connectOptions,
       String invocationContext, String activityToken)
       throws MqttSecurityException, MqttException {
-	  	MqttConnection client = getConnection(clientHandle);
-	  	client.connect(connectOptions, null, activityToken);
+        MqttConnection client = getConnection(clientHandle);
+        client.connect(connectOptions, null, activityToken);
 
   }
 
@@ -334,14 +335,14 @@ public class MqttService extends Service implements MqttTraceHandler {
    * Request all clients to reconnect if appropriate
    */
   void reconnect() {
-	traceDebug(TAG, "Reconnect to server, client size=" + connections.size());
-	for (MqttConnection client : connections.values()) {
-			traceDebug("Reconnect Client:",
-					client.getClientId() + '/' + client.getServerURI());
-		if(this.isOnline()){
-			client.reconnect();
-		}
-	}
+    traceDebug(TAG, "Reconnect to server, client size=" + connections.size());
+    for (MqttConnection client : connections.values()) {
+            traceDebug("Reconnect Client:",
+                    client.getClientId() + '/' + client.getServerURI());
+        if(this.isOnline()){
+            client.reconnect();
+        }
+    }
   }
 
   /**
@@ -615,7 +616,7 @@ public class MqttService extends Service implements MqttTraceHandler {
   @Override
   public void onCreate() {
     super.onCreate();
-
+    Log.i("MqttService", "onCreate()");
     // create a binder that will let the Activity UI send
     // commands to the Service
     mqttServiceBinder = new MqttServiceBinder(this);
@@ -623,32 +624,30 @@ public class MqttService extends Service implements MqttTraceHandler {
     // create somewhere to buffer received messages until
     // we know that they have been passed to the application
     messageStore = new DatabaseMessageStore(this, this);
-	}
+    }
 
-
-
-	/**
-	 * @see android.app.Service#onDestroy()
-	 */
-	@Override
-	public void onDestroy() {
-		// disconnect immediately
-		for (MqttConnection client : connections.values()) {
-			client.disconnect(null, null);
-		}
+    /**
+     * @see android.app.Service#onDestroy()
+     */
+    @Override
+    public void onDestroy() {
+        // disconnect immediately
+        for (MqttConnection client : connections.values()) {
+            client.disconnect(null, null);
+        }
 
     // clear down
     if (mqttServiceBinder != null) {
       mqttServiceBinder = null;
     }
 
-		unregisterBroadcastReceivers();
+        unregisterBroadcastReceivers();
 
-		if (this.messageStore !=null )
-			this.messageStore.close();
+        if (this.messageStore !=null )
+            this.messageStore.close();
 
-		super.onDestroy();
-	}
+        super.onDestroy();
+    }
 
   /**
    * @see android.app.Service#onBind(Intent)
@@ -669,9 +668,10 @@ public class MqttService extends Service implements MqttTraceHandler {
    */
   @Override
   public int onStartCommand(final Intent intent, int flags, final int startId) {
+      Log.i("MqttService", "onCreate()");
     // run till explicitly stopped, restart when
     // process restarted
-	registerBroadcastReceivers();
+    registerBroadcastReceivers();
 
     return START_STICKY;
   }
@@ -701,7 +701,7 @@ public class MqttService extends Service implements MqttTraceHandler {
    * @return the state of trace
    */
   public boolean isTraceEnabled(){
-	  return this.traceEnabled;
+      return this.traceEnabled;
   }
 
   /**
@@ -768,37 +768,37 @@ public class MqttService extends Service implements MqttTraceHandler {
 
   @SuppressWarnings("deprecation")
   private void registerBroadcastReceivers() {
-		if (networkConnectionMonitor == null) {
-			networkConnectionMonitor = new NetworkConnectionIntentReceiver();
-			registerReceiver(networkConnectionMonitor, new IntentFilter(
-					ConnectivityManager.CONNECTIVITY_ACTION));
-		}
+        if (networkConnectionMonitor == null) {
+            networkConnectionMonitor = new NetworkConnectionIntentReceiver();
+            registerReceiver(networkConnectionMonitor, new IntentFilter(
+                    ConnectivityManager.CONNECTIVITY_ACTION));
+        }
 
-		if (Build.VERSION.SDK_INT < 14 /**Build.VERSION_CODES.ICE_CREAM_SANDWICH**/) {
-			// Support the old system for background data preferences
-			ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-			backgroundDataEnabled = cm.getBackgroundDataSetting();
-			if (backgroundDataPreferenceMonitor == null) {
-				backgroundDataPreferenceMonitor = new BackgroundDataPreferenceReceiver();
-				registerReceiver(
-						backgroundDataPreferenceMonitor,
-						new IntentFilter(
-								ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED));
-			}
-		}
+        if (Build.VERSION.SDK_INT < 14 /**Build.VERSION_CODES.ICE_CREAM_SANDWICH**/) {
+            // Support the old system for background data preferences
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            backgroundDataEnabled = cm.getBackgroundDataSetting();
+            if (backgroundDataPreferenceMonitor == null) {
+                backgroundDataPreferenceMonitor = new BackgroundDataPreferenceReceiver();
+                registerReceiver(
+                        backgroundDataPreferenceMonitor,
+                        new IntentFilter(
+                                ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED));
+            }
+        }
   }
 
   private void unregisterBroadcastReceivers(){
-  	if(networkConnectionMonitor != null){
-  		unregisterReceiver(networkConnectionMonitor);
-  		networkConnectionMonitor = null;
-  	}
+    if(networkConnectionMonitor != null){
+        unregisterReceiver(networkConnectionMonitor);
+        networkConnectionMonitor = null;
+    }
 
-  	if (Build.VERSION.SDK_INT < 14 /**Build.VERSION_CODES.ICE_CREAM_SANDWICH**/) {
-  		if(backgroundDataPreferenceMonitor != null){
-  			unregisterReceiver(backgroundDataPreferenceMonitor);
-  		}
-		}
+    if (Build.VERSION.SDK_INT < 14 /**Build.VERSION_CODES.ICE_CREAM_SANDWICH**/) {
+        if(backgroundDataPreferenceMonitor != null){
+            unregisterReceiver(backgroundDataPreferenceMonitor);
+        }
+        }
   }
 
   /*
@@ -808,81 +808,81 @@ public class MqttService extends Service implements MqttTraceHandler {
    */
   private class NetworkConnectionIntentReceiver extends BroadcastReceiver {
 
-		@Override
+        @Override
         @SuppressLint("Wakelock")
-		public void onReceive(Context context, Intent intent) {
-			traceDebug(TAG, "Internal network status receive.");
-			// we protect against the phone switching off
-			// by requesting a wake lock - we request the minimum possible wake
-			// lock - just enough to keep the CPU running until we've finished
-			PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-			WakeLock wl = pm
-					.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
-			wl.acquire();
-			traceDebug(TAG,"Reconnect for Network recovery.");
-			if (isOnline()) {
-				traceDebug(TAG,"Online,reconnect.");
-				// we have an internet connection - have another try at
-				// connecting
-				reconnect();
-			} else {
-				notifyClientsOffline();
-			}
+        public void onReceive(Context context, Intent intent) {
+            traceDebug(TAG, "Internal network status receive.");
+            // we protect against the phone switching off
+            // by requesting a wake lock - we request the minimum possible wake
+            // lock - just enough to keep the CPU running until we've finished
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            WakeLock wl = pm
+                    .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
+            wl.acquire();
+            traceDebug(TAG,"Reconnect for Network recovery.");
+            if (isOnline()) {
+                traceDebug(TAG,"Online,reconnect.");
+                // we have an internet connection - have another try at
+                // connecting
+                reconnect();
+            } else {
+                notifyClientsOffline();
+            }
 
-			wl.release();
-		}
+            wl.release();
+        }
   }
 
-	/**
-	 * @return whether the android service can be regarded as online
-	 */
-	public boolean isOnline() {
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+    /**
+     * @return whether the android service can be regarded as online
+     */
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
       //noinspection RedundantIfStatement
       if (networkInfo != null
               && networkInfo.isAvailable()
               && networkInfo.isConnected()
               && backgroundDataEnabled) {
-			return true;
-		}
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Notify clients we're offline
-	 */
+    /**
+     * Notify clients we're offline
+     */
     private void notifyClientsOffline() {
-		for (MqttConnection connection : connections.values()) {
-			connection.offline();
-		}
-	}
+        for (MqttConnection connection : connections.values()) {
+            connection.offline();
+        }
+    }
 
-	/**
-	 * Detect changes of the Allow Background Data setting - only used below
-	 * ICE_CREAM_SANDWICH
-	 */
-	private class BackgroundDataPreferenceReceiver extends BroadcastReceiver {
+    /**
+     * Detect changes of the Allow Background Data setting - only used below
+     * ICE_CREAM_SANDWICH
+     */
+    private class BackgroundDataPreferenceReceiver extends BroadcastReceiver {
 
-		@SuppressWarnings("deprecation")
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-			traceDebug(TAG,"Reconnect since BroadcastReceiver.");
-			if (cm.getBackgroundDataSetting()) {
-				if (!backgroundDataEnabled) {
-					backgroundDataEnabled = true;
-					// we have the Internet connection - have another try at
-					// connecting
-					reconnect();
-				}
-			} else {
-				backgroundDataEnabled = false;
-				notifyClientsOffline();
-			}
-		}
-	}
+        @SuppressWarnings("deprecation")
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            traceDebug(TAG,"Reconnect since BroadcastReceiver.");
+            if (cm.getBackgroundDataSetting()) {
+                if (!backgroundDataEnabled) {
+                    backgroundDataEnabled = true;
+                    // we have the Internet connection - have another try at
+                    // connecting
+                    reconnect();
+                }
+            } else {
+                backgroundDataEnabled = false;
+                notifyClientsOffline();
+            }
+        }
+    }
 
   /**
    * Sets the DisconnectedBufferOptions for this client
